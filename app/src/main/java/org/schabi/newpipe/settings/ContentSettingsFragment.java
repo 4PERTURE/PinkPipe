@@ -18,7 +18,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.schabi.newpipe.R;
 import org.schabi.newpipe.extractor.NewPipe;
-import org.schabi.newpipe.extractor.utils.Localization;
+import org.schabi.newpipe.util.Localization;
 import org.schabi.newpipe.report.ErrorActivity;
 import org.schabi.newpipe.report.UserAction;
 import org.schabi.newpipe.util.FilePickerActivityHelper;
