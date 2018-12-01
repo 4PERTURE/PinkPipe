@@ -1,6 +1,7 @@
 package org.schabi.newpipe.info_list;
 
 import android.app.Activity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -13,11 +14,17 @@ import org.schabi.newpipe.extractor.playlist.PlaylistInfoItem;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 import org.schabi.newpipe.info_list.holder.ChannelInfoItemHolder;
 import org.schabi.newpipe.info_list.holder.ChannelMiniInfoItemHolder;
+<<<<<<< HEAD
 import org.schabi.newpipe.info_list.holder.CommentsInfoItemHolder;
 import org.schabi.newpipe.info_list.holder.CommentsMiniInfoItemHolder;
+=======
+import org.schabi.newpipe.info_list.holder.ChannelGridInfoItemHolder;
+>>>>>>> 0ad56874b4f34aeb9efeff1a68fd321274ea2659
 import org.schabi.newpipe.info_list.holder.InfoItemHolder;
+import org.schabi.newpipe.info_list.holder.PlaylistGridInfoItemHolder;
 import org.schabi.newpipe.info_list.holder.PlaylistInfoItemHolder;
 import org.schabi.newpipe.info_list.holder.PlaylistMiniInfoItemHolder;
+import org.schabi.newpipe.info_list.holder.StreamGridInfoItemHolder;
 import org.schabi.newpipe.info_list.holder.StreamInfoItemHolder;
 import org.schabi.newpipe.info_list.holder.StreamMiniInfoItemHolder;
 import org.schabi.newpipe.util.FallbackViewHolder;
@@ -55,16 +62,23 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private static final int MINI_STREAM_HOLDER_TYPE = 0x100;
     private static final int STREAM_HOLDER_TYPE = 0x101;
+    private static final int GRID_STREAM_HOLDER_TYPE = 0x102;
     private static final int MINI_CHANNEL_HOLDER_TYPE = 0x200;
     private static final int CHANNEL_HOLDER_TYPE = 0x201;
+    private static final int GRID_CHANNEL_HOLDER_TYPE = 0x202;
     private static final int MINI_PLAYLIST_HOLDER_TYPE = 0x300;
     private static final int PLAYLIST_HOLDER_TYPE = 0x301;
+<<<<<<< HEAD
     private static final int MINI_COMMENT_HOLDER_TYPE = 0x400;
     private static final int COMMENT_HOLDER_TYPE = 0x401;
+=======
+    private static final int GRID_PLAYLIST_HOLDER_TYPE = 0x302;
+>>>>>>> 0ad56874b4f34aeb9efeff1a68fd321274ea2659
 
     private final InfoItemBuilder infoItemBuilder;
     private final ArrayList<InfoItem> infoItemList;
     private boolean useMiniVariant = false;
+    private boolean useGridVariant = false;
     private boolean showFooter = false;
     private View header = null;
     private View footer = null;
@@ -101,6 +115,10 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public void useMiniItemVariants(boolean useMiniVariant) {
         this.useMiniVariant = useMiniVariant;
+    }
+
+    public void setGridItemVariants(boolean useGridVariant) {
+        this.useGridVariant = useGridVariant;
     }
 
     public void addInfoItemList(List<InfoItem> data) {
@@ -215,13 +233,17 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         final InfoItem item = infoItemList.get(position);
         switch (item.getInfoType()) {
             case STREAM:
-                return useMiniVariant ? MINI_STREAM_HOLDER_TYPE : STREAM_HOLDER_TYPE;
+                return useGridVariant ? GRID_STREAM_HOLDER_TYPE : useMiniVariant ? MINI_STREAM_HOLDER_TYPE : STREAM_HOLDER_TYPE;
             case CHANNEL:
-                return useMiniVariant ? MINI_CHANNEL_HOLDER_TYPE : CHANNEL_HOLDER_TYPE;
+                return useGridVariant ? GRID_CHANNEL_HOLDER_TYPE : useMiniVariant ? MINI_CHANNEL_HOLDER_TYPE : CHANNEL_HOLDER_TYPE;
             case PLAYLIST:
+<<<<<<< HEAD
                 return useMiniVariant ? MINI_PLAYLIST_HOLDER_TYPE : PLAYLIST_HOLDER_TYPE;
             case COMMENT:
                 return useMiniVariant ? MINI_COMMENT_HOLDER_TYPE : COMMENT_HOLDER_TYPE;
+=======
+                return useGridVariant ? GRID_PLAYLIST_HOLDER_TYPE : useMiniVariant ? MINI_PLAYLIST_HOLDER_TYPE : PLAYLIST_HOLDER_TYPE;
+>>>>>>> 0ad56874b4f34aeb9efeff1a68fd321274ea2659
             default:
                 Log.e(TAG, "Trollolo");
                 return -1;
@@ -241,18 +263,27 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 return new StreamMiniInfoItemHolder(infoItemBuilder, parent);
             case STREAM_HOLDER_TYPE:
                 return new StreamInfoItemHolder(infoItemBuilder, parent);
+            case GRID_STREAM_HOLDER_TYPE:
+                return new StreamGridInfoItemHolder(infoItemBuilder, parent);
             case MINI_CHANNEL_HOLDER_TYPE:
                 return new ChannelMiniInfoItemHolder(infoItemBuilder, parent);
             case CHANNEL_HOLDER_TYPE:
                 return new ChannelInfoItemHolder(infoItemBuilder, parent);
+            case GRID_CHANNEL_HOLDER_TYPE:
+                return new ChannelGridInfoItemHolder(infoItemBuilder, parent);
             case MINI_PLAYLIST_HOLDER_TYPE:
                 return new PlaylistMiniInfoItemHolder(infoItemBuilder, parent);
             case PLAYLIST_HOLDER_TYPE:
                 return new PlaylistInfoItemHolder(infoItemBuilder, parent);
+<<<<<<< HEAD
             case MINI_COMMENT_HOLDER_TYPE:
                 return new CommentsMiniInfoItemHolder(infoItemBuilder, parent);
             case COMMENT_HOLDER_TYPE:
                 return new CommentsInfoItemHolder(infoItemBuilder, parent);
+=======
+            case GRID_PLAYLIST_HOLDER_TYPE:
+                return new PlaylistGridInfoItemHolder(infoItemBuilder, parent);
+>>>>>>> 0ad56874b4f34aeb9efeff1a68fd321274ea2659
             default:
                 Log.e(TAG, "Trollolo");
                 return new FallbackViewHolder(new View(parent.getContext()));
@@ -272,5 +303,15 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (holder instanceof HFHolder && position == sizeConsideringHeaderOffset() && footer != null && showFooter) {
             ((HFHolder) holder).view = footer;
         }
+    }
+
+    public GridLayoutManager.SpanSizeLookup getSpanSizeLookup(final int spanCount) {
+        return new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                final int type = getItemViewType(position);
+                return type == HEADER_TYPE || type == FOOTER_TYPE ? spanCount : 1;
+            }
+        };
     }
 }

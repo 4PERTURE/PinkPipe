@@ -36,11 +36,13 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,13 +70,13 @@ import org.schabi.newpipe.fragments.BackPressable;
 import org.schabi.newpipe.fragments.BaseStateFragment;
 import org.schabi.newpipe.fragments.list.comments.CommentsFragment;
 import org.schabi.newpipe.fragments.list.videos.RelatedVideosFragment;
+import org.schabi.newpipe.info_list.InfoItemBuilder;
 import org.schabi.newpipe.info_list.InfoItemDialog;
 import org.schabi.newpipe.local.dialog.PlaylistAppendDialog;
 import org.schabi.newpipe.local.history.HistoryRecordManager;
 import org.schabi.newpipe.player.MainVideoPlayer;
 import org.schabi.newpipe.player.PopupVideoPlayer;
 import org.schabi.newpipe.player.helper.PlayerHelper;
-import org.schabi.newpipe.player.old.PlayVideoActivity;
 import org.schabi.newpipe.player.playqueue.PlayQueue;
 import org.schabi.newpipe.player.playqueue.SinglePlayQueue;
 import org.schabi.newpipe.report.ErrorActivity;
@@ -89,6 +91,7 @@ import org.schabi.newpipe.util.NavigationHelper;
 import org.schabi.newpipe.util.PermissionHelper;
 import org.schabi.newpipe.util.StreamItemAdapter;
 import org.schabi.newpipe.util.StreamItemAdapter.StreamSizeWrapper;
+import org.schabi.newpipe.util.ThemeHelper;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -154,6 +157,7 @@ public class VideoDetailFragment
 
     private View videoTitleRoot;
     private TextView videoTitleTextView;
+    @Nullable
     private ImageView videoTitleToggleArrow;
     private TextView videoCountView;
 
@@ -420,14 +424,16 @@ public class VideoDetailFragment
     }
 
     private void toggleTitleAndDescription() {
-        if (videoDescriptionRootLayout.getVisibility() == View.VISIBLE) {
-            videoTitleTextView.setMaxLines(1);
-            videoDescriptionRootLayout.setVisibility(View.GONE);
-            videoTitleToggleArrow.setImageResource(R.drawable.arrow_down);
-        } else {
-            videoTitleTextView.setMaxLines(10);
-            videoDescriptionRootLayout.setVisibility(View.VISIBLE);
-            videoTitleToggleArrow.setImageResource(R.drawable.arrow_up);
+        if (videoTitleToggleArrow != null) {    //it is null for tablets
+            if (videoDescriptionRootLayout.getVisibility() == View.VISIBLE) {
+                videoTitleTextView.setMaxLines(1);
+                videoDescriptionRootLayout.setVisibility(View.GONE);
+                videoTitleToggleArrow.setImageResource(R.drawable.arrow_down);
+            } else {
+                videoTitleTextView.setMaxLines(10);
+                videoDescriptionRootLayout.setVisibility(View.VISIBLE);
+                videoTitleToggleArrow.setImageResource(R.drawable.arrow_up);
+            }
         }
     }
 
@@ -578,6 +584,45 @@ public class VideoDetailFragment
         if (!TextUtils.isEmpty(info.getUploaderAvatarUrl())) {
             imageLoader.displayImage(info.getUploaderAvatarUrl(), uploaderThumb,
                     ImageDisplayConstants.DISPLAY_AVATAR_OPTIONS);
+        }
+    }
+
+    private void initRelatedVideos(StreamInfo info) {
+        if (relatedStreamsView.getChildCount() > 0) relatedStreamsView.removeAllViews();
+
+        if (info.getNextVideo() != null && showRelatedStreams) {
+            nextStreamTitle.setVisibility(View.VISIBLE);
+            relatedStreamsView.addView(
+                    infoItemBuilder.buildView(relatedStreamsView, info.getNextVideo()));
+            relatedStreamsView.addView(getSeparatorView());
+            setRelatedStreamsVisibility(View.VISIBLE);
+        } else {
+            nextStreamTitle.setVisibility(View.GONE);
+            setRelatedStreamsVisibility(View.GONE);
+        }
+
+        if (info.getRelatedStreams() != null
+                && !info.getRelatedStreams().isEmpty() && showRelatedStreams) {
+            //long first = System.nanoTime(), each;
+            int to = info.getRelatedStreams().size() >= INITIAL_RELATED_VIDEOS
+                    ? INITIAL_RELATED_VIDEOS
+                    : info.getRelatedStreams().size();
+            for (int i = 0; i < to; i++) {
+                InfoItem item = info.getRelatedStreams().get(i);
+                //each = System.nanoTime();
+                relatedStreamsView.addView(infoItemBuilder.buildView(relatedStreamsView, item));
+                //if (DEBUG) Log.d(TAG, "each took " + ((System.nanoTime() - each) / 1000000L) + "ms");
+            }
+            //if (DEBUG) Log.d(TAG, "Total time " + ((System.nanoTime() - first) / 1000000L) + "ms");
+
+            setRelatedStreamsVisibility(View.VISIBLE);
+            relatedStreamExpandButton.setVisibility(View.VISIBLE);
+
+            relatedStreamExpandButton.setImageDrawable(ContextCompat.getDrawable(
+                    activity, ThemeHelper.resolveResourceIdFromAttr(activity, R.attr.expand)));
+        } else {
+            if (info.getNextVideo() == null) setRelatedStreamsVisibility(View.GONE);
+            relatedStreamExpandButton.setVisibility(View.GONE);
         }
     }
 
@@ -872,7 +917,7 @@ public class VideoDetailFragment
                 .getBoolean(this.getString(R.string.use_external_video_player_key), false)) {
             startOnExternalPlayer(activity, currentInfo, selectedVideoStream);
         } else {
-            openNormalPlayer(selectedVideoStream);
+            openNormalPlayer();
         }
     }
 
@@ -885,24 +930,13 @@ public class VideoDetailFragment
         }
     }
 
-    private void openNormalPlayer(VideoStream selectedVideoStream) {
+    private void openNormalPlayer() {
         Intent mIntent;
-        boolean useOldPlayer = PlayerHelper.isUsingOldPlayer(activity) || (Build.VERSION.SDK_INT < 16);
-        if (!useOldPlayer) {
-            // ExoPlayer
-            final PlayQueue playQueue = new SinglePlayQueue(currentInfo);
-            mIntent = NavigationHelper.getPlayerIntent(activity,
-                    MainVideoPlayer.class,
-                    playQueue,
-                    getSelectedVideoStream().getResolution());
-        } else {
-            // Internal Player
-            mIntent = new Intent(activity, PlayVideoActivity.class)
-                    .putExtra(PlayVideoActivity.VIDEO_TITLE, currentInfo.getName())
-                    .putExtra(PlayVideoActivity.STREAM_URL, selectedVideoStream.getUrl())
-                    .putExtra(PlayVideoActivity.VIDEO_URL, currentInfo.getUrl())
-                    .putExtra(PlayVideoActivity.START_POSITION, currentInfo.getStartPosition());
-        }
+        final PlayQueue playQueue = new SinglePlayQueue(currentInfo);
+        mIntent = NavigationHelper.getPlayerIntent(activity,
+                MainVideoPlayer.class,
+                playQueue,
+                getSelectedVideoStream().getResolution());
         startActivity(mIntent);
     }
 
@@ -1042,8 +1076,16 @@ public class VideoDetailFragment
         animateView(videoTitleTextView, true, 0);
 
         videoDescriptionRootLayout.setVisibility(View.GONE);
-        videoTitleToggleArrow.setImageResource(R.drawable.arrow_down);
-        videoTitleToggleArrow.setVisibility(View.GONE);
+        if (videoTitleToggleArrow != null) {    //phone
+            videoTitleToggleArrow.setImageResource(R.drawable.arrow_down);
+            videoTitleToggleArrow.setVisibility(View.GONE);
+        } else {    //tablet
+            final View related = (View) relatedStreamRootLayout.getParent();
+            //don`t need to hide it if related streams are disabled
+            if (related.getVisibility() == View.VISIBLE) {
+                related.setVisibility(View.INVISIBLE);
+            }
+        }
         videoTitleRoot.setClickable(false);
 
         imageLoader.cancelDisplayTask(thumbnailImageView);
@@ -1124,11 +1166,15 @@ public class VideoDetailFragment
             detailDurationView.setVisibility(View.GONE);
         }
 
-        videoTitleRoot.setClickable(true);
-        videoTitleToggleArrow.setVisibility(View.VISIBLE);
-        videoTitleToggleArrow.setImageResource(R.drawable.arrow_down);
         videoDescriptionView.setVisibility(View.GONE);
-        videoDescriptionRootLayout.setVisibility(View.GONE);
+        if (videoTitleToggleArrow != null) {
+            videoTitleRoot.setClickable(true);
+            videoTitleToggleArrow.setVisibility(View.VISIBLE);
+            videoTitleToggleArrow.setImageResource(R.drawable.arrow_down);
+            videoDescriptionRootLayout.setVisibility(View.GONE);
+        } else {
+            videoDescriptionRootLayout.setVisibility(View.VISIBLE);
+        }
         if (!TextUtils.isEmpty(info.getUploadDate())) {
             videoUploadDateView.setText(Localization.localizeDate(activity, info.getUploadDate()));
         }
@@ -1170,6 +1216,11 @@ public class VideoDetailFragment
             openVideoPlayer();
             // Only auto play in the first open
             autoPlayEnabled = false;
+        }
+
+        final ViewParent related = relatedStreamRootLayout.getParent();
+        if (related instanceof ScrollView) {
+            ((ScrollView) related).scrollTo(0, 0);
         }
     }
 
@@ -1227,5 +1278,14 @@ public class VideoDetailFragment
         });
 
         showError(getString(R.string.blocked_by_gema), false, R.drawable.gruese_die_gema);
+    }
+
+    private void setRelatedStreamsVisibility(int visibility) {
+        final ViewParent parent = relatedStreamRootLayout.getParent();
+        if (parent instanceof ScrollView) {
+            ((ScrollView) parent).setVisibility(visibility);
+        } else {
+            relatedStreamRootLayout.setVisibility(visibility);
+        }
     }
 }
