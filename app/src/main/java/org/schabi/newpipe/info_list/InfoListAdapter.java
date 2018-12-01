@@ -14,12 +14,9 @@ import org.schabi.newpipe.extractor.playlist.PlaylistInfoItem;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 import org.schabi.newpipe.info_list.holder.ChannelInfoItemHolder;
 import org.schabi.newpipe.info_list.holder.ChannelMiniInfoItemHolder;
-<<<<<<< HEAD
 import org.schabi.newpipe.info_list.holder.CommentsInfoItemHolder;
 import org.schabi.newpipe.info_list.holder.CommentsMiniInfoItemHolder;
-=======
 import org.schabi.newpipe.info_list.holder.ChannelGridInfoItemHolder;
->>>>>>> 0ad56874b4f34aeb9efeff1a68fd321274ea2659
 import org.schabi.newpipe.info_list.holder.InfoItemHolder;
 import org.schabi.newpipe.info_list.holder.PlaylistGridInfoItemHolder;
 import org.schabi.newpipe.info_list.holder.PlaylistInfoItemHolder;
@@ -68,12 +65,9 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int GRID_CHANNEL_HOLDER_TYPE = 0x202;
     private static final int MINI_PLAYLIST_HOLDER_TYPE = 0x300;
     private static final int PLAYLIST_HOLDER_TYPE = 0x301;
-<<<<<<< HEAD
     private static final int MINI_COMMENT_HOLDER_TYPE = 0x400;
     private static final int COMMENT_HOLDER_TYPE = 0x401;
-=======
     private static final int GRID_PLAYLIST_HOLDER_TYPE = 0x302;
->>>>>>> 0ad56874b4f34aeb9efeff1a68fd321274ea2659
 
     private final InfoItemBuilder infoItemBuilder;
     private final ArrayList<InfoItem> infoItemList;
@@ -237,13 +231,10 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case CHANNEL:
                 return useGridVariant ? GRID_CHANNEL_HOLDER_TYPE : useMiniVariant ? MINI_CHANNEL_HOLDER_TYPE : CHANNEL_HOLDER_TYPE;
             case PLAYLIST:
-<<<<<<< HEAD
                 return useMiniVariant ? MINI_PLAYLIST_HOLDER_TYPE : PLAYLIST_HOLDER_TYPE;
             case COMMENT:
                 return useMiniVariant ? MINI_COMMENT_HOLDER_TYPE : COMMENT_HOLDER_TYPE;
-=======
                 return useGridVariant ? GRID_PLAYLIST_HOLDER_TYPE : useMiniVariant ? MINI_PLAYLIST_HOLDER_TYPE : PLAYLIST_HOLDER_TYPE;
->>>>>>> 0ad56874b4f34aeb9efeff1a68fd321274ea2659
             default:
                 Log.e(TAG, "Trollolo");
                 return -1;
@@ -275,15 +266,12 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 return new PlaylistMiniInfoItemHolder(infoItemBuilder, parent);
             case PLAYLIST_HOLDER_TYPE:
                 return new PlaylistInfoItemHolder(infoItemBuilder, parent);
-<<<<<<< HEAD
             case MINI_COMMENT_HOLDER_TYPE:
                 return new CommentsMiniInfoItemHolder(infoItemBuilder, parent);
             case COMMENT_HOLDER_TYPE:
                 return new CommentsInfoItemHolder(infoItemBuilder, parent);
-=======
             case GRID_PLAYLIST_HOLDER_TYPE:
                 return new PlaylistGridInfoItemHolder(infoItemBuilder, parent);
->>>>>>> 0ad56874b4f34aeb9efeff1a68fd321274ea2659
             default:
                 Log.e(TAG, "Trollolo");
                 return new FallbackViewHolder(new View(parent.getContext()));
