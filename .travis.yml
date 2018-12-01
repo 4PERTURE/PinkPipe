@@ -47,3 +47,4 @@ deploy:
     script: "sh scripts/deploy-telegram.sh"
     on:
       branch: comments-test
+
