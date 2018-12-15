@@ -16,7 +16,7 @@ signingConfigs {
 
     defaultConfig {
         applicationId "sos.apeture.pinkpipe"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 28
         versionCode 69
         versionName "0.14.2"
@@ -64,7 +64,7 @@ dependencies {
         exclude module: 'support-annotations'
     })
 
-    implementation 'com.github.TeamNewPipe:NewPipeExtractor:32d316330c26'
+    implementation 'com.github.yausername:NewPipeExtractor:4c49a34'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.23.0'

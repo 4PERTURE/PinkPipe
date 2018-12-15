@@ -17,7 +17,6 @@
     <string name="use_external_video_player_key" translatable="false">use_external_video_player</string>
     <string name="use_external_audio_player_key" translatable="false">use_external_audio_player</string>
     <string name="autoplay_through_intent_key" translatable="false">autoplay_through_intent</string>
-    <string name="use_old_player_key" translatable="false">use_oldplayer</string>
 
     <string name="volume_gesture_control_key" translatable="false">volume_gesture_control</string>
     <string name="brightness_gesture_control_key" translatable="false">brightness_gesture_control</string>
@@ -138,6 +137,7 @@
     <string name="show_search_suggestions_key" translatable="false">show_search_suggestions</string>
     <string name="show_play_with_kodi_key" translatable="false">show_play_with_kodi</string>
     <string name="show_next_video_key" translatable="false">show_next_video</string>
+    <string name="show_comments_key" translatable="false">show_comments</string>
     <string name="show_hold_to_append_key" translatable="false">show_hold_to_append</string>
     <string name="default_language_value">en</string>
     <string name="default_country_value">GB</string>
