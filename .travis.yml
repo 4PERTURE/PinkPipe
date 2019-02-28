@@ -20,8 +20,6 @@ android:
 branches:
   only:
     - master
-    - dev
-    - comments-test
     
 before_install:
   - chmod +x gradlew
@@ -44,10 +42,3 @@ deploy:
     on:
       branch: master
 
-
-deploy:
-  - provider: script
-    skip_cleanup: true
-    script: "sh scripts/deploy-telegram.sh"
-    on:
-      branch: comments-test
