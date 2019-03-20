@@ -19,7 +19,7 @@ signingConfigs {
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 720
-        versionName "3-beta"
+        versionName "3.1-beta"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
